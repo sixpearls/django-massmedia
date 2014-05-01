@@ -1,7 +1,6 @@
 from massmedia import models
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.xheaders import populate_xheaders
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
@@ -62,7 +61,6 @@ def mediatype_detail(request, queryset, object_id=None, slug=None,
         else:
             c[key] = value
     response = HttpResponse(t.render(c), mimetype=mimetype)
-    populate_xheaders(request, response, model, getattr(obj, obj._meta.pk.name))
     return response
 
 
