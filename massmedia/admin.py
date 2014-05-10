@@ -129,7 +129,7 @@ class MediaAdmin(admin.ModelAdmin):
                            form_url='', obj=None):
         opts = self.model._meta
         app_label = opts.app_label
-        ordered_objects = opts.get_ordered_objects()
+        # ordered_objects = opts.get_ordered_objects()
         is_popup = '_popup' in request.REQUEST or 'pop' in request.REQUEST
         context.update({
             'add': add,
@@ -139,7 +139,7 @@ class MediaAdmin(admin.ModelAdmin):
             'has_delete_permission': self.has_delete_permission(request, obj),
             'has_file_field': True,  # FIXME - this should check if form or formsets have a FileField,
             'has_absolute_url': hasattr(self.model, 'get_absolute_url'),
-            'ordered_objects': ordered_objects,
+            # 'ordered_objects': ordered_objects,
             'form_url': mark_safe(form_url),
             'opts': opts,
             'content_type_id': ContentType.objects.get_for_model(self.model).id,
