@@ -1,3 +1,4 @@
+import django
 from django.contrib import admin
 from django.contrib.admin.widgets import AdminFileWidget, AdminURLFieldWidget
 from django.contrib.contenttypes.models import ContentType
@@ -15,9 +16,6 @@ import settings
 from forms import (ImageCreationForm, VideoCreationForm, AudioCreationForm,
     FlashCreationForm, DocumentCreationForm, EmbedCreationForm)
 
-# from templatetags.media_widgets import snipshot_url
-
-
 class AdminImageWidget(AdminFileWidget):
     def render(self, name, value, attrs=None):
         output = []
@@ -25,17 +23,13 @@ class AdminImageWidget(AdminFileWidget):
             thumbnail = value.instance.thumbnail.url
             width = value.instance.thumb_width
             height = value.instance.thumb_height
-            # snipshot = snipshot_url(value.instance)
-            # crop_tag = '''<br /><a class="link" href="#" onclick="var win = window.open('%s','snipshot', 'height=500,width=800,resizable=yes,scrollbars=yes');win.focus();">Crop image with snipshot</a>''' % snipshot
             tag = u'<img src="%s" width="%s" height="%s"/>' % (
                 thumbnail, width, height)
         else:
-            # crop_tag = u""
             tag = _("<strong>No Thumbnail available</strong>")
         if value:
             output.append(u'<a href="%s" target="_blank">%s</a>' % (
                 value.url, tag))
-            # output.append(crop_tag)
         return mark_safe(u''.join(output))
 
 
@@ -129,7 +123,6 @@ class MediaAdmin(admin.ModelAdmin):
                            form_url='', obj=None):
         opts = self.model._meta
         app_label = opts.app_label
-        # ordered_objects = opts.get_ordered_objects()
         is_popup = '_popup' in request.REQUEST or 'pop' in request.REQUEST
         context.update({
             'add': add,
@@ -139,7 +132,6 @@ class MediaAdmin(admin.ModelAdmin):
             'has_delete_permission': self.has_delete_permission(request, obj),
             'has_file_field': True,  # FIXME - this should check if form or formsets have a FileField,
             'has_absolute_url': hasattr(self.model, 'get_absolute_url'),
-            # 'ordered_objects': ordered_objects,
             'form_url': mark_safe(form_url),
             'opts': opts,
             'content_type_id': ContentType.objects.get_for_model(self.model).id,
@@ -147,6 +139,11 @@ class MediaAdmin(admin.ModelAdmin):
             'save_on_top': self.save_on_top,
             'is_popup': is_popup,
         })
+        if django.VERSION < (1,5):
+            ordered_objects = opts.get_ordered_objects()
+            context.update({
+                 'ordered_objects': ordered_objects,
+                })
         context_instance = template.RequestContext(request, current_app=self.admin_site.name)
         if add:
             return render_to_response(self.add_form_template or [
