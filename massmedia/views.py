@@ -7,6 +7,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 
+from django.contrib.admin.options import IS_POPUP_VAR
+
+
 def widget(request, id, type):
     try:
         assert hasattr(models, type.capitalize())
@@ -69,12 +72,11 @@ def browse(request):
     path = request.path.strip('/').split('/')
     if len(path) > 1:
         return HttpResponse('You want an %s with an id of %s' % ('idk', path[-1]))
-    if 'pop' not in request.GET:
+    if not request.GET.get(IS_POPUP_VAR):
         return HttpResponse('Incorrect parameters. Need pop=1')
     getcopy = request.GET.copy()
     if 'type' in getcopy:
-        get_type = getcopy['type']
-        del getcopy['type']
+        get_type = getcopy.pop('type')[0]
     else:
         get_type = 'image'
     request.GET = getcopy

@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 
+from django.contrib.admin.options import IS_POPUP_VAR
 
 from models import (Image, Video, Audio, Flash, Collection, Embed, Document,
     CollectionRelation, MediaTemplate)
@@ -123,7 +124,7 @@ class MediaAdmin(admin.ModelAdmin):
                            form_url='', obj=None):
         opts = self.model._meta
         app_label = opts.app_label
-        is_popup = '_popup' in request.REQUEST or 'pop' in request.REQUEST
+        is_popup = IS_POPUP_VAR in request.REQUEST
         context.update({
             'add': add,
             'change': change,
@@ -190,7 +191,7 @@ class ImageAdmin(MediaAdmin):
 
         Returns a different result only if pop=2
         """
-        if 'pop' in request.GET:
+        if IS_POPUP_VAR in request.GET:
             pk_value = obj._get_pk_val()
             return HttpResponse('<script type="text/javascript">opener.myDismissAddAnotherPopup(window, "%s", "%s");</script>' % \
                 # escape() calls force_unicode.
