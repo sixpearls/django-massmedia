@@ -246,10 +246,9 @@ class CollectionInline(GenericCollectionTabularInline):
 
 
 class CollectionAdmin(admin.ModelAdmin):
-    fields = ('title', 'slug', 'caption', 'zip_file', 'external_url', 'public', 'site')
+    fields = ('title', 'caption', 'zip_file', 'external_url', 'public', 'site')
     list_display = ('title', 'caption', 'public', 'creation_date')
     list_filter = ('site', 'creation_date', 'public')
-    prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'creation_date'
     search_fields = ('caption',)
     inlines = (CollectionInline,)

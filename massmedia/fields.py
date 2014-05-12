@@ -3,9 +3,7 @@ import re
 import time
 
 from django.db import models
-from django.utils.simplejson import dumps, loads
-from django.utils import simplejson
-
+import json
 
 class SerializedObjectField(models.TextField):
     __metaclass__ = models.SubfieldBase
@@ -18,9 +16,9 @@ class SerializedObjectField(models.TextField):
     def to_python(self, value):
         try:
             if self.decoder:
-                return loads(str(value), cls=self.decoder)
+                return json.loads(str(value), cls=self.decoder)
             else:
-                return loads(str(value))
+                return json.loads(str(value))
         except Exception:
             # If an error was raised, just return the plain value
             return value
@@ -33,7 +31,7 @@ class SerializedObjectField(models.TextField):
                 except UnicodeDecodeError:
                     return '{}'
             else:
-                value = dumps(value)
+                value = json.dumps(value)
         return str(value)
 
     def get_internal_type(self):
@@ -109,7 +107,7 @@ class Metadata(object):
         return result
 
     def from_json(self, json_str):
-        result = simplejson.loads(json_str)
+        result = json.loads(json_str)
         dt_regex = re.compile(r'^new\sDate\(Date\.UTC\((.*?)\)\)')
         td_regex = re.compile(r'^(\d+:\d+:\d+\.\d+)$')
         for key, value in result.items():
@@ -118,7 +116,7 @@ class Metadata(object):
                 n = td_regex.match(value)
                 if m:
                     result[key] = datetime.datetime(
-                        *(simplejson.loads('[%s]' % m.group(1))))
+                        *(json.simplejson('[%s]' % m.group(1))))
                 if n:
                     vals = n.group(1).split(':')
                     result[key] = datetime.timedelta(
@@ -137,7 +135,7 @@ class Metadata(object):
         return str(self.as_json())
 
 
-class MetadataJSONEncoder(simplejson.JSONEncoder):
+class MetadataJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         value = obj
         if isinstance(value, datetime.datetime):
@@ -159,7 +157,7 @@ class MetadataJSONEncoder(simplejson.JSONEncoder):
             return super(MetadataJSONEncoder, self).default(value)
 
 
-class MetadataJSONDecoder(simplejson.JSONDecoder):
+class MetadataJSONDecoder(json.JSONDecoder):
     def decode(self, json_str):
         md = Metadata()
         md.from_json(json_str)

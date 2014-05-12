@@ -5,7 +5,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from django.conf import settings
+from django.conf import settings as site_settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
@@ -282,7 +282,6 @@ class Collection(models.Model):
     """
     creation_date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
     caption = models.TextField(blank=True)
     zip_file = models.FileField(
         _("Media files in a .zip"),
@@ -295,7 +294,7 @@ class Collection(models.Model):
     public = models.BooleanField(
         help_text=_("this collection is publicly available"),
         default=True)
-    site = models.ForeignKey(Site)
+    site = models.ForeignKey(Site, default=site_settings.SITE_ID)
 
     objects = PublicMediaManager()
 
@@ -305,13 +304,6 @@ class Collection(models.Model):
 
     def __unicode__(self):
         return self.title
-
-    @models.permalink
-    def get_absolute_url(self):
-        return ('massmedia_detail', (), {
-            'mediatype': self.__class__.__name__.lower(),
-            'slug': self.slug
-        })
 
     def save(self, *args, **kwargs):
         if self.site_id is None:
@@ -359,7 +351,7 @@ class Collection(models.Model):
             )
 
         for filename in zip_file.namelist():
-            #if settings.DEBUG:
+            #if site_settings.DEBUG:
             print "Processing ", filename
             if filename.startswith('__') or filename.startswith('.'):
                 # do not process hidden or meta files
@@ -384,7 +376,7 @@ class Collection(models.Model):
                     trial_image = PilImage.open(StringIO(data))
                     trial_image.verify()
                 except Exception, e:
-                    if settings.DEBUG:
+                    if site_settings.DEBUG:
                         raise e
                     continue
 
