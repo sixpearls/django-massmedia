@@ -420,7 +420,7 @@ class CollectionRelation(models.Model):
         ordering = ['position', 'id']
 
     def __unicode__(self):
-        return unicode(self.content_object)
+        return self.collection.__unicode__() + u"'s " + unicode(self.content_object)
 
 
 class MediaTemplate(models.Model):

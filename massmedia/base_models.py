@@ -1,5 +1,6 @@
 import sys
 import mimetypes
+import logging
 
 from django.db import models
 from django.conf import settings
@@ -31,6 +32,7 @@ except ImportError:
     EXTRACT_METADATA = False
 sys.stdout, sys.stderr = OUT, ERR
 
+logger = logging.getLogger(__name__)
 
 class PublicMediaManager(CurrentSiteManager):
     def __init__(self):
@@ -230,7 +232,7 @@ class Media(models.Model):
             metadata = extractMetadata(parser, appsettings.INFO_QUALITY)
             if not metadata:
                 if settings.DEBUG:
-                    raise Exception("No metadata was extracted.")
+                    logger.debug("No metadata was extracted.")
                 return {}
         except (InputStreamError, HachoirError):
             if settings.DEBUG:
